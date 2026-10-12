@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionario sugli Stili di Apprendimento</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instructions {
+            background: #e0e7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: space-around;
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .question-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .question-card:hover {
+            border-color: var(--primary);
+        }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .options label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #results {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .result-section {
+            background: #f8fafc;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .result-section h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Stili di Apprendimento</h1>
+    <div class="instructions">
+        <p>Le seguenti affermazioni descrivono alcune abitudini di studio e modi di imparare. Decidi in quale misura ogni affermazione si applica nel tuo caso[cite: 1].</p>
+    </div>
+
+    <div class="legend">
+        <span>0 = per niente</span>
+        <span>1 = poco</span>
+        <span>2 = abbastanza</span>
+        <span>3 = molto</span>
+    </div>
+
+    <form id="quizForm">
+        <div id="questionsContainer"></div>
+        <button type="button" onclick="calculateResults()">Calcola il mio stile</button>
+    </form>
+
+    <div id="results">
+        <h2>I tuoi Risultati</h2>
+        <div id="resultsContent"></div>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        "Quando studio, se sottolineo o evidenzio parole e frasi mi concentro di più.",
+        "Mi piace lavorare senza pianificare tutto all'inizio, ma \"aggiustando il tiro\" man mano che procedo.",
+        "Preferisco che l'insegnante ci assegni lavori che ognuno di noi possa poi svolgere come preferisce.",
+        "Mi risulta difficile capire un termine o un concetto se non mi vengono dati degli esempi.",
+        "Mi confondono grafici e diagrammi che non sono accompagnati da spiegazioni scritte.",
+        "Preferisco i lavori da svolgere passo per passo, completando un compito prima di iniziare il successivo.",
+        "Ricordo meglio un argomento se posso fare un'esperienza diretta (es. esperimento, modello, ricerca).",
+        "Preferisco imparare leggendo un libro piuttosto che ascoltando una lezione.",
+        "Sono soddisfatto se di un argomento capisco le idee generali, senza considerare i particolari.",
+        "Capisco meglio un argomento parlandone o discutendone con qualcuno piuttosto che soltanto leggendo un testo.",
+        "Mi piace lavorare in gruppo.",
+        "Quando studio su un libro imparo di più guardando figure, grafici e mappe piuttosto che leggendo il testo scritto.",
+        "Se devo raccontare o riferire qualcosa mi soffermo molto sui dettagli.",
+        "Riesco facilmente a seguire qualcuno che parla anche se non lo guardo in faccia.",
+        "Capisco meglio le istruzioni di un compito se mi sono presentate per iscritto.",
+        "Se si deve lavorare a gruppi, preferisco che sia l'insegnante a decidere come formare i gruppi.",
+        "Durante una lezione o una discussione scrivere o disegnare qualcosa mi aiuta a concentrarmi.",
+        "Imparo e ricordo di più quando studio da solo.",
+        "In un lavoro di gruppo preferisco che l'insegnante ci lasci liberi di distribuirci i compiti all'interno del gruppo.",
+        "Organizzo il mio tempo, sia nello studio che nelle altre attività.",
+        "Quando leggo un testo mi creo mentalmente delle immagini sulla storia, i personaggi o le idee.",
+        "Quando studio ho bisogno di pause frequenti e di movimento fisico.",
+        "Alla fine di un lavoro di gruppo mi sento di avere imparato di più che se avessi lavorato da solo.",
+        "Preferisco gli esercizi con una sola soluzione o risposta piuttosto che gli esercizi più \"aperti\" e \"creativi\".",
+        "Quando in classe lavoro con un compagno o in gruppo ho la sensazione di perdere tempo.",
+        "Mi risulta più facile ricordare figure e illustrazioni in un libro se sono stampate a colori vivaci.",
+        "Imparo meglio se parto da una visione generale dell'insieme piuttosto che da dettagli e aspetti specifici.",
+        "Preferisco che una regola o una teoria mi venga chiaramente spiegata prima di applicarla in esempi ed esercizi.",
+        "Per capire un testo che sto studiando mi aiuto facendo disegni e diagrammi.",
+        "Imparo di più durante le lezioni in classe che studiando a casa.",
+        "Non mi piace leggere o ascoltare le istruzioni per un compito; preferirei cominciare subito a lavorarci.",
+        "Capisco meglio le istruzioni di un compito se mi vengono spiegate a voce e non soltanto fornite per iscritto.",
+        "Se un compito deve essere svolto a gruppi, preferisco che siano gli studenti stessi a decidere come formare i gruppi.",
+        "Prendo appunti durante le spiegazioni dell'insegnante e le discussioni in classe e li rileggo poi per conto mio.",
+        "Mi risulta abbastanza facile sintetizzare ciò che è stato detto in una discussione.",
+        "Quando studio mi concentro di più se leggo o ripeto a voce alta.",
+        "Imparo di più a casa che in classe.",
+        "Se devo decidere se qualcosa è giusto o corretto, mi baso più sull'istinto che sulla logica.",
+        "Preferisco imparare vedendo un video o ascoltando una cassetta piuttosto che leggendo un libro.",
+        "Quando studio su un libro prendo appunti o faccio riassunti."
+    ];
+
+    // Mappatura esatta basata sulla griglia di calcolo del documento
+    const mapping = {
+        areaA: {
+            visivoVerbale: [4, 12, 14, 17, 34, 40],
+            visivoNonVerbale: [5, 21, 26, 29],
+            uditivo: [10, 32, 36, 39],
+            cinestetico: [1, 7, 15, 22, 31]
+        },
+        areaB: {
+            analitico: [6, 13, 20, 24, 28],
+            globale: [2, 9, 27, 35, 38]
+        },
+        areaC: {
+            individuale: [3, 16, 18, 25, 37],
+            gruppo: [11, 19, 23, 30, 33]
+        }
+    };
+
+    // Generazione dinamica delle domande
+    const container = document.getElementById('questionsContainer');
+    questions.forEach((q, index) => {
+        const qNum = index + 1;
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.innerHTML = `
+            <div class="question-text">${qNum}. ${q}</div>
+            <div class="options">
+                <label><input type="radio" name="q${qNum}" value="0" required> 0 (per niente)</label>
+                <label><input type="radio" name="q${qNum}" value="1"> 1 (poco)</label>
+                <label><input type="radio" name="q${qNum}" value="2"> 2 (abbastanza)</label>
+                <label><input type="radio" name="q${qNum}" value="3"> 3 (molto)</label>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+
+    function calculateResults() {
+        // Verifica compilazione
+        for (let i = 1; i <= 40; i++) {
+            const radios = document.getElementsByName(`q${i}`);
+            let answered = false;
+            for (let r of radios) {
+                if (r.checked) answered = true;
+            }
+            if (!answered) {
+                alert(`Per favore, rispondi alla domanda numero ${i}.`);
+                return;
+            }
+        }
+
+        // Funzione di supporto per sommare i punteggi di un array di domande
+        const getSum = (arr) => arr.reduce((sum, num) => sum + parseInt(document.querySelector(`input[name="q${num}"]:checked`).value), 0);
+
+        // Calcolo Area A
+        const scoreVV = getSum(mapping.areaA.visivoVerbale);
+        const scoreVNV = getSum(mapping.areaA.visivoNonVerbale);
+        const scoreUditivo = getSum(mapping.areaA.uditivo);
+        const scoreCinestetico = getSum(mapping.areaA.cinestetico);
+        const totalAreaA = scoreVV + scoreVNV + scoreUditivo + scoreCinestetico;
+
+        // Calcolo Area B
+        const scoreAnalitico = getSum(mapping.areaB.analitico);
+        const scoreGlobale = getSum(mapping.areaB.globale);
+        const totalAreaB = scoreAnalitico + scoreGlobale;
+
+        // Calcolo Area C
+        const scoreIndividuale = getSum(mapping.areaC.individuale);
+        const scoreGruppo = getSum(mapping.areaC.gruppo);
+        const totalAreaC = scoreIndividuale + scoreGruppo;
+
+        // Calcolo Percentuali Area A
+        const percVV = totalAreaA ? Math.round((scoreVV * 100) / totalAreaA) : 0;
+        const percVNV = totalAreaA ? Math.round((scoreVNV * 100) / totalAreaA) : 0;
+        const percUditivo = totalAreaA ? Math.round((scoreUditivo * 100) / totalAreaA) : 0;
+        const percCinestetico = totalAreaA ? Math.round((scoreCinestetico * 100) / totalAreaA) : 0;
+
+        // Calcolo Percentuali Area B
+        const percAnalitico = totalAreaB ? Math.round((scoreAnalitico * 100) / totalAreaB) : 0;
+        const percGlobale = totalAreaB ? Math.round((scoreGlobale * 100) / totalAreaB) : 0;
+
+        // Calcolo Percentuali Area C
+        const percIndividuale = totalAreaC ? Math.round((scoreIndividuale * 100) / totalAreaC) : 0;
+        const percGruppo = totalAreaC ? Math.round((scoreGruppo * 100) / totalAreaC) : 0;
+
+        // Rendering dei risultati
+        const resultsDiv = document.getElementById('resultsContent');
+        resultsDiv.innerHTML = `
+            <div class="result-section">
+                <h3>Area A: Canali Sensoriali (Percezione)</h3>
+                <ul>
+                    <li><strong>Visivo Verbale:</strong> ${scoreVV} punti (${percVV}%)</li>
+                    <li><strong>Visivo Non Verbale:</strong> ${scoreVNV} punti (${percVNV}%)</li>
+                    <li><strong>Uditivo:</strong> ${scoreUditivo} punti (${percUditivo}%)</li>
+                    <li><strong>Cinestetico:</strong> ${scoreCinestetico} punti (${percCinestetico}%)</li>
+                </ul>
+            </div>
+
+            <div class="result-section">
+                <h3>Area B: Elaborazione delle Informazioni</h3>
+                <ul>
+                    <li><strong>Analitico:</strong> ${scoreAnalitico} punti (${percAnalitico}%)</li>
+                    <li><strong>Globale:</strong> ${scoreGlobale} punti (${percGlobale}%)</li>
+                </ul>
+            </div>
+
+            <div class="result-section">
+                <h3>Area C: Modalità di Lavoro</h3>
+                <ul>
+                    <li><strong>Individuale:</strong> ${scoreIndividuale} punti (${percIndividuale}%)</li>
+                    <li><strong>Di Gruppo:</strong> ${scoreGruppo} punti (${percGruppo}%)</li>
+                </ul>
+            </div>
+            
+            <p><em>Nota bene: La maggior parte delle persone mostra una combinazione di stili diversi a seconda delle circostanze[cite: 3]. Consulta le strategie specifiche per valorizzare al massimo il tuo profilo!</em></p>
+        `;
+
+        document.getElementById('results').style.display = 'block';
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
